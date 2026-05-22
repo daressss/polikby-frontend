@@ -4,7 +4,9 @@ import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
-axios.defaults.baseURL = 'http://localhost:5000/api';
+const API_URL = 'https://polikby-backend-production.up.railway.app/api';
+
+axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 
 export const useAuth = () => useContext(AuthContext);
