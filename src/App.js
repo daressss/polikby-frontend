@@ -32,23 +32,16 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
         return <Navigate to="/" />;
     }
 
-    // Если пользователь - админ и пытается зайти на обычный dashboard
-    if (user?.role === 'admin' && allowedRoles.length === 0) {
+    // Перенаправление по ролям
+    if (user?.role === 'admin' && window.location.pathname !== '/admin/dashboard') {
         return <Navigate to="/admin/dashboard" />;
     }
 
-    // Если пользователь - врач и пытается зайти на обычный dashboard
-    if (user?.role === 'doctor' && allowedRoles.length === 0) {
+    if (user?.role === 'doctor' && window.location.pathname !== '/doctor/dashboard') {
         return <Navigate to="/doctor/dashboard" />;
     }
 
     if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-        if (user?.role === 'doctor') {
-            return <Navigate to="/doctor/dashboard" />;
-        }
-        if (user?.role === 'admin') {
-            return <Navigate to="/admin/dashboard" />;
-        }
         return <Navigate to="/dashboard" />;
     }
 
@@ -57,12 +50,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
 function App() {
     return (
-        <Router
-            future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-            }}
-        >
+        <Router>
             <AuthProvider>
                 <div className="App">
                     <Header />
@@ -76,7 +64,6 @@ function App() {
                         <Route path="/schedule/specialization" element={<SpecializationPage />} />
                         <Route path="/schedule/doctor" element={<DoctorPage />} />
                         <Route path="/schedule/calendar" element={<CalendarPage />} />
-                        <Route path="/schedule" element={<Navigate to="/schedule/specialization" />} />
 
                         {/* Маршруты заказа талона */}
                         <Route path="/book/specialization" element={
@@ -104,7 +91,6 @@ function App() {
                                 <BookingConfirm />
                             </ProtectedRoute>
                         } />
-                        <Route path="/book" element={<Navigate to="/book/specialization" />} />
 
                         {/* Защищенные маршруты пациента */}
                         <Route path="/dashboard" element={
