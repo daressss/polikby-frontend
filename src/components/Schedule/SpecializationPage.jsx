@@ -4,7 +4,16 @@ import { doctorsAPI } from '../../services/api';
 import ScheduleBreadcrumbs from './ScheduleBreadcrumbs';
 import ScheduleSidebar from './ScheduleSidebar';
 import { FaStethoscope } from 'react-icons/fa';
+const SpecializationPage = () => {
+    return (
+        <div style={{ padding: '50px', textAlign: 'center' }}>
+            <h1>Страница выбора специальности</h1>
+            <p>Если вы видите этот текст — компонент работает!</p>
+        </div>
+    );
+};
 
+export default SpecializationPage;
 const SpecializationPage = () => {
     const navigate = useNavigate();
     const [specializations, setSpecializations] = useState([]);
