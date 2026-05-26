@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { patientsAPI, appointmentsAPI } from '../../services/api';
-import { FaUserPlus, FaUser, FaCalendarAlt, FaHistory, FaTrash, FaCalendarPlus, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaUserPlus, FaUser, FaCalendarAlt, FaHistory, FaTrash, FaCalendarPlus, FaClock, FaCheckCircle, FaTimesCircle, FaUserEdit } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import Breadcrumbs from './Breadcrumbs';
+import api from '../../services/api';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -24,7 +25,8 @@ const Dashboard = () => {
     const steps = [
         { key: 'patients', label: 'Пациенты' },
         { key: 'appointments', label: 'Талоны' },
-        { key: 'history', label: 'История' }
+        { key: 'history', label: 'История' },
+        { key: 'profile', label: 'Профиль' }
     ];
 
     const getCurrentStep = () => {
@@ -32,6 +34,7 @@ const Dashboard = () => {
             case 'patients': return 0;
             case 'appointments': return 1;
             case 'history': return 2;
+            case 'profile': return 3;
             default: return 0;
         }
     };
@@ -86,7 +89,6 @@ const Dashboard = () => {
             const response = await appointmentsAPI.getMy();
             if (response.data.success) {
                 setHistoryAppointments(response.data.history || []);
-                console.log('History loaded:', response.data.history);
             }
         } catch (error) {
             console.error('Error loading history:', error);
@@ -167,6 +169,135 @@ const Dashboard = () => {
             <span className={`status-badge ${s.class}`}>
                 {s.icon} {s.text}
             </span>
+        );
+    };
+
+    // ============ ВКЛАДКА ПРОФИЛЬ ============
+    const ProfileTab = () => {
+        const [profileData, setProfileData] = useState({
+            email: '',
+            phone: '',
+            address: '',
+            district_number: ''
+        });
+        const [loading, setLoading] = useState(false);
+        const [saving, setSaving] = useState(false);
+
+        useEffect(() => {
+            loadProfile();
+        }, []);
+
+        const loadProfile = async () => {
+            setLoading(true);
+            try {
+                const userResponse = await api.get('/auth/me');
+                if (userResponse.data.success) {
+                    setProfileData(prev => ({
+                        ...prev,
+                        email: userResponse.data.user.email || '',
+                        phone: userResponse.data.user.phone || ''
+                    }));
+                }
+                
+                const patientResponse = await patientsAPI.getMy();
+                if (patientResponse.data.success && patientResponse.data.patients.length > 0) {
+                    const selfPatient = patientResponse.data.patients.find(p => p.patient_type === 'self');
+                    if (selfPatient) {
+                        setProfileData(prev => ({
+                            ...prev,
+                            address: selfPatient.address || '',
+                            district_number: selfPatient.district_number || ''
+                        }));
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                toast.error('Ошибка загрузки профиля');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const handleSave = async () => {
+            setSaving(true);
+            try {
+                await api.put('/users/profile', {
+                    email: profileData.email,
+                    phone: profileData.phone
+                });
+                
+                await api.put('/patients/profile', {
+                    address: profileData.address,
+                    district_number: profileData.district_number
+                });
+                
+                toast.success('Профиль обновлен');
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                toast.error('Ошибка сохранения');
+            } finally {
+                setSaving(false);
+            }
+        };
+
+        if (loading) {
+            return <div className="text-center py-5"><div className="spinner-border text-success"></div></div>;
+        }
+
+        return (
+            <div className="profile-tab">
+                <div className="profile-card">
+                    <h3><FaUserEdit /> Редактирование профиля</h3>
+                    
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input 
+                            type="email" 
+                            className="form-input"
+                            value={profileData.email} 
+                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                            placeholder="Ваш email"
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label>Телефон</label>
+                        <input 
+                            type="tel" 
+                            className="form-input"
+                            value={profileData.phone} 
+                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                            placeholder="Ваш телефон"
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label>Адрес</label>
+                        <textarea 
+                            className="form-textarea"
+                            rows="2"
+                            value={profileData.address} 
+                            onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                            placeholder="Ваш адрес"
+                        />
+                    </div>
+                    
+                    <div className="form-group">
+                        <label>Номер участка</label>
+                        <input 
+                            type="number" 
+                            className="form-input"
+                            value={profileData.district_number} 
+                            onChange={(e) => setProfileData({...profileData, district_number: e.target.value})}
+                            placeholder="Номер участка"
+                        />
+                    </div>
+                    
+                    <button className="btn-primary" onClick={handleSave} disabled={saving}>
+                        {saving ? 'Сохранение...' : 'Сохранить изменения'}
+                    </button>
+                </div>
+            </div>
         );
     };
 
@@ -267,7 +398,9 @@ const Dashboard = () => {
                                 {getStatusBadge(apt.status)}
                             </div>
                             {apt.status === 'booked' && (
-                                <button className="btn-sm btn-danger" onClick={() => handleCancelAppointment(apt.id)}>Отменить</button>
+                                <button className="cancel-appointment-btn" onClick={() => handleCancelAppointment(apt.id)}>
+                                    <FaTimesCircle /> Отменить
+                                </button>
                             )}
                         </div>
                     ))}
@@ -344,6 +477,7 @@ const Dashboard = () => {
                     {activeTab === 'patients' && <PatientsTab />}
                     {activeTab === 'appointments' && <AppointmentsTab />}
                     {activeTab === 'history' && <HistoryTab />}
+                    {activeTab === 'profile' && <ProfileTab />}
                 </div>
             </div>
         </div>
