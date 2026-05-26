@@ -37,4 +37,8 @@ export const schedulesAPI = {
     getPublic: (doctorId) => api.get(`/schedules/public?doctor_id=${doctorId}`),
 };
 
+export const medicalHistoryAPI = {
+    getByPatientId: (patientId) => api.get(`/medical-history/patient/${patientId}`),
+};
+
 export default api;
