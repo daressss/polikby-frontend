@@ -6642,3 +6642,68 @@ body {
     border-color: #e74c3c !important;
     box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1) !important;
 }
+
+/* Стили для истории посещений */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.history-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s;
+    border-left: 4px solid #3BAF4A;
+}
+
+.history-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.history-date {
+    min-width: 100px;
+    text-align: center;
+}
+
+.history-date .date-day {
+    font-weight: 600;
+    color: #333;
+    display: block;
+}
+
+.history-date .date-time {
+    font-size: 0.8rem;
+    color: #3BAF4A;
+}
+
+.history-info {
+    flex: 1;
+}
+
+.history-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.history-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.status-badge.status-completed {
+    background: #D4EDDA;
+    color: #155724;
+}
+
+.status-badge.status-no-show {
+    background: #F8D7DA;
+    color: #721C24;
+}
