@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaHistory, FaUserMd, FaCalendarAlt, FaArrowLeft } from 'react-icons/fa';
-import api from '../../services/api';
+import { medicalHistoryAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
 const MedicalHistory = () => {
@@ -22,7 +22,7 @@ const MedicalHistory = () => {
 
     const loadMedicalHistory = async () => {
         try {
-            const response = await api.get(`/medical-history/patient/${patientId}`);
+            const response = await medicalHistoryAPI.getByPatientId(patientId);
             if (response.data.success) {
                 setHistory(response.data.history);
             } else {
@@ -38,9 +38,12 @@ const MedicalHistory = () => {
 
     const loadPatientInfo = async () => {
         try {
-            const response = await api.get(`/patients/${patientId}`);
-            if (response.data.success) {
-                setPatientName(response.data.patient.full_name);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/patients/${patientId}`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (data.success) {
+                setPatientName(data.patient.full_name);
             }
         } catch (error) {
             console.error('Error loading patient info:', error);
@@ -85,7 +88,7 @@ const MedicalHistory = () => {
                     <div className="empty-history">
                         <FaHistory className="empty-icon" />
                         <h3>История болезни пуста</h3>
-                        <p>У этого пациента пока нет записей о посещениях</p>
+                        <p>После приема врача здесь появится история ваших посещений</p>
                         <Link to="/dashboard" className="btn-primary mt-3">Вернуться в личный кабинет</Link>
                     </div>
                 ) : (
