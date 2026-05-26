@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaHistory, FaUserMd, FaCalendarAlt, FaArrowLeft } from 'react-icons/fa';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 const MedicalHistory = () => {
     const { patientId } = useParams();
@@ -13,21 +14,23 @@ const MedicalHistory = () => {
         if (patientId) {
             loadMedicalHistory();
             loadPatientInfo();
+        } else {
+            setLoading(false);
+            toast.error('ID пациента не указан');
         }
     }, [patientId]);
 
     const loadMedicalHistory = async () => {
-        setLoading(true);
         try {
-            console.log('Loading medical history for patient:', patientId);
             const response = await api.get(`/medical-history/patient/${patientId}`);
-            console.log('Medical history response:', response.data);
             if (response.data.success) {
                 setHistory(response.data.history);
-                console.log('History set:', response.data.history);
+            } else {
+                toast.error(response.data.message || 'Ошибка загрузки истории');
             }
         } catch (error) {
             console.error('Error loading medical history:', error);
+            toast.error('Ошибка загрузки истории болезни');
         } finally {
             setLoading(false);
         }
@@ -42,6 +45,14 @@ const MedicalHistory = () => {
         } catch (error) {
             console.error('Error loading patient info:', error);
         }
+    };
+
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
     };
 
     if (loading) {
@@ -83,7 +94,7 @@ const MedicalHistory = () => {
                             <div key={record.id} className="history-card">
                                 <div className="history-date">
                                     <FaCalendarAlt />
-                                    <span>{new Date(record.visit_date).toLocaleDateString('ru-RU')}</span>
+                                    <span>{formatDate(record.visit_date)}</span>
                                 </div>
                                 <div className="history-doctor">
                                     <FaUserMd />
@@ -92,9 +103,11 @@ const MedicalHistory = () => {
                                 <div className="history-diagnosis">
                                     <strong>Диагноз:</strong> {record.diagnosis}
                                 </div>
-                                <div className="history-prescription">
-                                    <strong>Назначения:</strong> {record.prescription}
-                                </div>
+                                {record.prescription && (
+                                    <div className="history-prescription">
+                                        <strong>Назначения:</strong> {record.prescription}
+                                    </div>
+                                )}
                                 {record.notes && (
                                     <div className="history-notes">
                                         <strong>Примечания:</strong> {record.notes}
