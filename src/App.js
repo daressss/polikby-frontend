@@ -10,6 +10,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import MedicalHistory from './components/MedicalHistory/MedicalHistory';
 import DoctorDashboard from './components/Doctor/DoctorDashboard';
 import AdminDashboard from './components/Admin/AdminDashboard';
+import PublicDoctorsList from './components/Doctors/PublicDoctorsList';
 
 import SpecializationPage from './components/Schedule/SpecializationPage';
 import DoctorPage from './components/Schedule/DoctorPage';
@@ -59,6 +60,7 @@ function App() {
                         {/* Публичные маршруты */}
                         <Route path="/" element={<HomePage />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="/doctors" element={<PublicDoctorsList />} />
 
                         {/* Маршруты расписания */}
                         <Route path="/schedule/specialization" element={<SpecializationPage />} />
