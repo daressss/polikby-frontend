@@ -1,14 +1,12 @@
 import axios from 'axios';
 
-const API_URL = '/api';
+const API_URL = 'https://polikby-backend-production.up.railway.app/api';
 
 const api = axios.create({
     baseURL: API_URL,
     withCredentials: true,
-    headers: {
-        'Content-Type': 'application/json'
-    }
 });
+
 
 export const authAPI = {
     login: (username, password) => api.post('/auth/login', { username, password }),
