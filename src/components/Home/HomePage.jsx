@@ -38,7 +38,7 @@ const HomePage = () => {
                         <p className="feature-description">
                             Удобное расписание работы врачей. Выберите удобное время для посещения.
                         </p>
-                        <Link to="/schedule" className="feature-btn">
+                        <Link to="/schedule/specialization" className="feature-btn">
                             Посмотреть <FaArrowRight className="btn-icon" />
                         </Link>
                     </div>
@@ -52,7 +52,7 @@ const HomePage = () => {
                         <p className="feature-description">
                             Онлайн запись к врачу. Выберите специалиста и удобное время.
                         </p>
-                        <Link to="/book" className="feature-btn">
+                        <Link to="/book/specialization" className="feature-btn">
                             Заказать <FaArrowRight className="btn-icon" />
                         </Link>
                     </div>
@@ -73,7 +73,7 @@ const HomePage = () => {
                 </div>
             </div>
 
-            {/* Статистика (оставляем как есть) */}
+            {/* Статистика */}
             <div className="container stats-section">
                 <div className="stats-grid">
                     <div className="stat-item">
