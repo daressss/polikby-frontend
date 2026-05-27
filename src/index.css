@@ -6831,129 +6831,263 @@ body {
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
-import React, { useState, useEffect } from 'react';
-import { doctorsAPI } from '../../services/api';
-import { FaUserMd, FaStethoscope, FaMapMarkerAlt, FaUserClock } from 'react-icons/fa';
+/* ========== СТРАНИЦА ВРАЧЕЙ ========== */
 
-const PublicDoctorsList = () => {
-    const [doctors, setDoctors] = useState([]);
-    const [specializations, setSpecializations] = useState([]);
-    const [selectedSpec, setSelectedSpec] = useState('');
-    const [loading, setLoading] = useState(true);
+.doctors-page {
+    min-height: calc(100vh - 120px);
+    background: #fafafa;
+    padding: 40px 0 80px;
+}
 
-    useEffect(() => {
-        loadSpecializations();
-    }, []);
+.doctors-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
 
-    useEffect(() => {
-        loadDoctors();
-    }, [selectedSpec]);
+.doctors-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+    position: relative;
+    display: inline-block;
+}
 
-    const loadSpecializations = async () => {
-        try {
-            const response = await doctorsAPI.getSpecializations();
-            if (response.data.success) {
-                setSpecializations(response.data.specializations);
-            }
-        } catch (error) {
-            console.error('Error loading specializations:', error);
-        }
-    };
+.doctors-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: #3BAF4A;
+    border-radius: 2px;
+}
 
-    const loadDoctors = async () => {
-        setLoading(true);
-        try {
-            const response = await doctorsAPI.getAll(selectedSpec);
-            if (response.data.success) {
-                setDoctors(response.data.doctors);
-            }
-        } catch (error) {
-            console.error('Error loading doctors:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+.doctors-subtitle {
+    color: #666;
+    font-size: 1rem;
+}
 
-    return (
-        <div className="doctors-page">
-            <div className="container">
-                <div className="doctors-header">
-                    <h1 className="doctors-title">Наши врачи</h1>
-                    <p className="doctors-subtitle">Высококвалифицированные специалисты</p>
-                </div>
+.doctors-layout {
+    display: flex;
+    gap: 30px;
+}
 
-                <div className="doctors-layout">
-                    {/* Боковая панель со специализациями */}
-                    <div className="doctors-sidebar">
-                        <div className="specializations-card">
-                            <h3>
-                                <FaStethoscope className="card-icon" />
-                                Специализации
-                            </h3>
-                            <ul className="specializations-list">
-                                <li 
-                                    className={`spec-item ${!selectedSpec ? 'active' : ''}`}
-                                    onClick={() => setSelectedSpec('')}
-                                >
-                                    Все врачи
-                                </li>
-                                {specializations.map(spec => (
-                                    <li 
-                                        key={spec.specialization}
-                                        className={`spec-item ${selectedSpec === spec.specialization ? 'active' : ''}`}
-                                        onClick={() => setSelectedSpec(spec.specialization)}
-                                    >
-                                        {spec.specialization}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
+/* Боковая панель */
+.doctors-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+}
 
-                    {/* Список врачей */}
-                    <div className="doctors-content">
-                        {loading ? (
-                            <div className="text-center py-5">
-                                <div className="spinner-border text-success"></div>
-                                <p className="mt-2">Загрузка...</p>
-                            </div>
-                        ) : doctors.length === 0 ? (
-                            <div className="empty-state">
-                                <FaUserMd className="empty-icon" />
-                                <h3>Врачи не найдены</h3>
-                                <p>Попробуйте выбрать другую специальность</p>
-                            </div>
-                        ) : (
-                            <div className="doctors-grid">
-                                {doctors.map(doctor => (
-                                    <div key={doctor.id} className="doctor-card">
-                                        <div className="doctor-card-inner">
-                                            <div className="doctor-avatar">
-                                                <FaUserMd />
-                                            </div>
-                                            <div className="doctor-info">
-                                                <h4 className="doctor-name">{doctor.full_name}</h4>
-                                                <p className="doctor-specialization">
-                                                    <FaStethoscope /> {doctor.specialization}
-                                                </p>
-                                                <p className="doctor-room">
-                                                    <FaMapMarkerAlt /> Кабинет №{doctor.room_number}
-                                                </p>
-                                                <div className="doctor-stats">
-                                                    <FaUserClock /> 
-                                                    <span>Предстоящих приёмов: {doctor.upcoming_count || 0}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
+.specializations-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 100px;
+}
 
-export default PublicDoctorsList;
+.specializations-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3BAF4A;
+    color: #333;
+}
+
+.card-icon {
+    color: #3BAF4A;
+    font-size: 1.2rem;
+}
+
+.specializations-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.spec-item {
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.spec-item:hover {
+    background: #e8f5e9;
+    color: #3BAF4A;
+}
+
+.spec-item.active {
+    background: #3BAF4A;
+    color: white;
+}
+
+/* Контент */
+.doctors-content {
+    flex: 1;
+}
+
+.doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.doctor-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.doctor-card-inner {
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.doctor-avatar {
+    width: 60px;
+    height: 60px;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.doctor-avatar svg {
+    font-size: 1.8rem;
+    color: #3BAF4A;
+}
+
+.doctor-info {
+    flex: 1;
+}
+
+.doctor-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.doctor-specialization {
+    font-size: 0.85rem;
+    color: #3BAF4A;
+    margin: 0 0 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.doctor-specialization svg {
+    font-size: 0.75rem;
+}
+
+.doctor-room {
+    font-size: 0.8rem;
+    color: #888;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.doctor-room svg {
+    font-size: 0.75rem;
+}
+
+.doctor-stats {
+    font-size: 0.75rem;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Пустое состояние */
+.empty-state {
+    text-align: center;
+    padding: 60px 40px;
+    background: white;
+    border-radius: 16px;
+}
+
+.empty-state .empty-icon {
+    font-size: 4rem;
+    color: #3BAF4A;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #888;
+}
+
+/* Адаптивность */
+@media (max-width: 992px) {
+    .doctors-layout {
+        flex-direction: column;
+    }
+    
+    .doctors-sidebar {
+        width: 100%;
+    }
+    
+    .specializations-card {
+        position: static;
+    }
+    
+    .specializations-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .spec-item {
+        padding: 8px 16px;
+        background: #f0f0f0;
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .doctors-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .doctor-card-inner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .doctor-specialization,
+    .doctor-room,
+    .doctor-stats {
+        justify-content: center;
+    }
+}
