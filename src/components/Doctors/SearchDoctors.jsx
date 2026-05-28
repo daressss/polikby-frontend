@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';  // ← добавить useNavigate
 import { doctorsAPI } from '../../services/api';
 import { FaUserMd, FaStethoscope, FaMapMarkerAlt, FaSearch } from 'react-icons/fa';
 
 const SearchDoctors = () => {
     const location = useLocation();
+    const navigate = useNavigate();  // ← добавить эту строку
     const [searchTerm, setSearchTerm] = useState('');
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,7 +38,6 @@ const SearchDoctors = () => {
             const response = await doctorsAPI.getAll();
             if (response.data.success) {
                 setAllDoctors(response.data.doctors);
-                // Если есть поисковый запрос, фильтруем сразу
                 if (searchTerm) {
                     filterDoctors(response.data.doctors);
                 } else {
@@ -70,14 +70,11 @@ const SearchDoctors = () => {
         e.preventDefault();
         if (searchTerm.trim()) {
             filterDoctors();
-            // Обновляем URL
             navigate(`/doctors/search?search=${searchTerm}`, { replace: true });
         } else {
             setDoctors(allDoctors);
         }
     };
-
-    const navigate = useNavigate();
 
     if (loading && allDoctors.length === 0) {
         return (
