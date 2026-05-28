@@ -8,7 +8,7 @@ const SearchDoctors = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [specializations, setSpecializations] = useState([]);
+    const [allDoctors, setAllDoctors] = useState([]);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -19,49 +19,46 @@ const SearchDoctors = () => {
     }, [location.search]);
 
     useEffect(() => {
-        loadSpecializations();
+        loadAllDoctors();
     }, []);
 
     useEffect(() => {
-        if (searchTerm) {
-            searchDoctors();
-        } else {
-            loadDoctors();
+        if (allDoctors.length > 0 && searchTerm) {
+            filterDoctors();
+        } else if (allDoctors.length > 0 && !searchTerm) {
+            setDoctors(allDoctors);
+            setLoading(false);
         }
-    }, [searchTerm]);
+    }, [searchTerm, allDoctors]);
 
-    const loadDoctors = async () => {
+    const loadAllDoctors = async () => {
         setLoading(true);
         try {
             const response = await doctorsAPI.getAll();
             if (response.data.success) {
-                setDoctors(response.data.doctors);
+                setAllDoctors(response.data.doctors);
+                // Если есть поисковый запрос, фильтруем сразу
+                if (searchTerm) {
+                    filterDoctors(response.data.doctors);
+                } else {
+                    setDoctors(response.data.doctors);
+                    setLoading(false);
+                }
             }
         } catch (error) {
             console.error('Error loading doctors:', error);
-        } finally {
             setLoading(false);
         }
     };
 
-    const loadSpecializations = async () => {
-        try {
-            const response = await doctorsAPI.getSpecializations();
-            if (response.data.success) {
-                setSpecializations(response.data.specializations);
-            }
-        } catch (error) {
-            console.error('Error loading specializations:', error);
-        }
-    };
-
-    const searchDoctors = () => {
+    const filterDoctors = (doctorList = allDoctors) => {
         if (!searchTerm.trim()) {
-            loadDoctors();
+            setDoctors(doctorList);
+            setLoading(false);
             return;
         }
 
-        const filtered = doctors.filter(doctor =>
+        const filtered = doctorList.filter(doctor =>
             doctor.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -71,8 +68,28 @@ const SearchDoctors = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        searchDoctors();
+        if (searchTerm.trim()) {
+            filterDoctors();
+            // Обновляем URL
+            navigate(`/doctors/search?search=${searchTerm}`, { replace: true });
+        } else {
+            setDoctors(allDoctors);
+        }
     };
+
+    const navigate = useNavigate();
+
+    if (loading && allDoctors.length === 0) {
+        return (
+            <div className="search-doctors-page">
+                <div className="container">
+                    <div className="text-center py-5">
+                        <div className="spinner-border text-success"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="search-doctors-page">
@@ -98,15 +115,11 @@ const SearchDoctors = () => {
                     </form>
                 </div>
 
-                {loading ? (
-                    <div className="text-center py-5">
-                        <div className="spinner-border text-success"></div>
-                    </div>
-                ) : doctors.length === 0 ? (
+                {doctors.length === 0 && searchTerm ? (
                     <div className="no-results">
                         <FaUserMd className="no-results-icon" />
                         <h3>Ничего не найдено</h3>
-                        <p>Попробуйте изменить поисковый запрос</p>
+                        <p>По запросу "{searchTerm}" ничего не найдено</p>
                         <Link to="/doctors" className="btn-primary">Смотреть всех врачей</Link>
                     </div>
                 ) : (
