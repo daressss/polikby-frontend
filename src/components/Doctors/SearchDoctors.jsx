@@ -11,7 +11,6 @@ const SearchDoctors = () => {
     const [specializations, setSpecializations] = useState([]);
 
     useEffect(() => {
-        // Получаем search-параметр из URL
         const params = new URLSearchParams(location.search);
         const search = params.get('search');
         if (search) {
@@ -20,13 +19,12 @@ const SearchDoctors = () => {
     }, [location.search]);
 
     useEffect(() => {
-        loadDoctors();
         loadSpecializations();
     }, []);
 
     useEffect(() => {
         if (searchTerm) {
-            filterDoctors();
+            searchDoctors();
         } else {
             loadDoctors();
         }
@@ -57,7 +55,7 @@ const SearchDoctors = () => {
         }
     };
 
-    const filterDoctors = () => {
+    const searchDoctors = () => {
         if (!searchTerm.trim()) {
             loadDoctors();
             return;
@@ -68,11 +66,12 @@ const SearchDoctors = () => {
             doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setDoctors(filtered);
+        setLoading(false);
     };
 
     const handleSearch = (e) => {
         e.preventDefault();
-        filterDoctors();
+        searchDoctors();
     };
 
     return (
@@ -129,9 +128,6 @@ const SearchDoctors = () => {
                                         <p className="text-muted">
                                             <FaMapMarkerAlt className="me-1" /> Каб. {doctor.room_number}
                                         </p>
-                                        <Link to={`/schedule/doctor?spec=${encodeURIComponent(doctor.specialization)}`} className="btn-sm btn-outline-success mt-2">
-                                            Выбрать
-                                        </Link>
                                     </div>
                                 </div>
                             ))}
